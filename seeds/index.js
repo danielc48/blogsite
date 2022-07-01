@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const seedData = require('./blogposts');
-const Post = require('../models/blogPost')
+const seedData = require('./article');
+const Article = require('../models/article')
 
 main().catch(err => console.log(err));
 
@@ -9,10 +9,10 @@ async function main() {
 }
 
 const seedDB = async() => {
-    await Post.deleteMany({});
+    await Article.deleteMany({});
     for (let data of seedData) {
-    const blogpost = new Post(data)
-    await blogpost.save()
+    const article = new Article(data)
+    await article.save()
     }
 }
 

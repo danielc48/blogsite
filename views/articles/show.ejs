@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <h1><%= article.title %></h1>
+        <p><%= article.date.toString().slice(0,16) %></p>
+    </div>
+    <div>
+        <%= article.description %> 
+    </div>
+    <div>
+        <%= article.markdown %> 
+    </div>
+    <a href="/articles">All articles</a>
+    <a href="/articles/<%=article.id%>/edit">Edit Article</a>
+    <form action="/articles/<%=article._id%>?_method=DELETE" method="POST">
+        <button>Delete</button>
+    </form>
+</body>
+</html>
