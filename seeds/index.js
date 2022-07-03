@@ -5,7 +5,7 @@ const Article = require('../models/article')
 main().catch(err => console.log(err));
 
 async function main() {
-  await mongoose.connect('mongodb://localhost:27017/blog');
+  await mongoose.connect('mongodb://localhost:27017/blogsite');
 }
 
 const seedDB = async() => {
