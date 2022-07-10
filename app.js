@@ -7,6 +7,7 @@ const methodOverride = require('method-override');
 const engine = require('ejs-mate');
 const catchAsync = require('./utils/catchAsync');
 const ExpressError = require('./utils/ExpressErrors')
+const {articleSchema} = require('./schemas')
 
 main().catch(err => console.log(err));
 
@@ -19,6 +20,18 @@ app.set('views', path.join(__dirname, 'views'))
 app.use(express.urlencoded({extended:true}))
 app.use(methodOverride('_method'))
 app.engine('ejs', engine)
+
+
+const validateArticle = (req,res,next) => {
+    const {error} = articleSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join()
+        throw new ExpressError(400,msg)
+    } else {
+        next();
+    }
+    
+}
 
 app.get('/', (req,res) => {
     res.render('home')
@@ -33,7 +46,7 @@ app.get('/articles/new', (req,res) => {
     res.render('articles/new')
 })
 
-app.post('/articles', catchAsync(async (req,res) => {
+app.post('/articles', validateArticle, catchAsync(async (req,res) => {
     if (!req.body.article) throw new ExpressError(400, 'Invalid Campground Data')
     const article = new Article(req.body.article)
     await article.save();
@@ -50,7 +63,7 @@ app.get('/articles/:id/edit', catchAsync(async(req,res) => {
     res.render('articles/edit', {article})
 }))
 
-app.put('/articles/:id', catchAsync(async(req,res) => {
+app.put('/articles/:id', validateArticle, catchAsync(async(req,res) => {
     const { id } = req.params;
     const article = await Article.findById(id)
     article.title = req.body.article.title;
