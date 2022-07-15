@@ -5,6 +5,8 @@ const createDOMPurify = require('dompurify');
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const dompurify = createDOMPurify(new JSDOM().window)
+
+const Comment = require('./comment')
  
 const articleSchema = new Schema({
     title: {
@@ -30,7 +32,13 @@ const articleSchema = new Schema({
     sanitizedHTML: {
         type: String,
         required:true
-    }
+    },
+    comments: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Comment'
+        }
+    ]
 })
 
 articleSchema.pre('validate', function(next) {
@@ -38,6 +46,16 @@ articleSchema.pre('validate', function(next) {
         this.sanitizedHTML = dompurify.sanitize(marked.parse(this.markdown)) 
     }
     next();
+})
+
+articleSchema.post('findOneAndDelete', async function(doc) {
+    if (doc) {
+        await Comment.deleteMany({
+            _id: {
+                $in: doc.comments
+            }
+        })
+    }
 })
 
 module.exports = mongoose.model('Article', articleSchema)

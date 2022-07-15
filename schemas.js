@@ -8,3 +8,10 @@ module.exports.articleSchema = Joi.object({
         markdown: Joi.string().required()
     }).required()
 })
+
+module.exports.commentSchema = Joi.object({
+    comment: Joi.object({
+        body: Joi.string().required(),
+        date: Joi.date().iso()
+    }).required()
+})

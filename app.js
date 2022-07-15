@@ -2,12 +2,13 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const mongoose = require('mongoose');
-const Article = require('./models/article') ;
+const Article = require('./models/article');
+const Comment = require('./models/comment')
 const methodOverride = require('method-override');
 const engine = require('ejs-mate');
 const catchAsync = require('./utils/catchAsync');
 const ExpressError = require('./utils/ExpressErrors')
-const {articleSchema} = require('./schemas')
+const {articleSchema, commentSchema} = require('./schemas')
 
 main().catch(err => console.log(err));
 
@@ -30,7 +31,17 @@ const validateArticle = (req,res,next) => {
     } else {
         next();
     }
-    
+}
+
+const validateComment = (req, res,next) => {
+    const {error} = commentSchema.validate(req.body)
+    console.log(error)
+    if (error) {
+        const msg = error.details.map(el => el.message).join()
+        throw new ExpressError(400,msg)
+    } else {
+        next();
+    }
 }
 
 app.get('/', (req,res) => {
@@ -54,7 +65,7 @@ app.post('/articles', validateArticle, catchAsync(async (req,res) => {
 }));
 
 app.get('/articles/:id', catchAsync(async(req,res,next) => {
-    const article = await Article.findById(req.params.id)
+    const article = await Article.findById(req.params.id).populate('comments')
     res.render('articles/show', {article})
 }))
 
@@ -78,6 +89,23 @@ app.delete('/articles/:id', catchAsync(async(req,res) => {
     const {id} = req.params;
     await Article.findByIdAndDelete(id);
     res.redirect('/articles')
+}))
+
+app.post('/articles/:id/comments', validateComment, catchAsync(async(req,res)=>{
+    const article = await Article.findById(req.params.id);
+    const comment = new Comment(req.body.comment);
+    article.comments.push(comment);
+    await article.save();
+    await comment.save();
+    res.redirect(`/articles/${article._id}`)
+
+}))
+
+app.delete('/articles/:id/comments/:commentId', catchAsync(async(req,res) => {
+    const {id, commentId} = req.params
+    await Article.findByIdAndUpdate(id, {$pull: {comments: commentId}})
+    await Comment.findByIdAndDelete(commentId)
+    res.redirect(`/articles/${id}`)
 }))
 
 app.all('*', (req,res,next) => {
