@@ -28,16 +28,25 @@ router.post('/', validateArticle, catchAsync(async (req,res) => {
     if (!req.body.article) throw new ExpressError(400, 'Invalid Campground Data')
     const article = new Article(req.body.article)
     await article.save();
+    req.flash('success', 'Successfully created a new article!')
     res.redirect(`/articles/${article._id}`)
 }));
 
 router.get('/:id', catchAsync(async(req,res,next) => {
     const article = await Article.findById(req.params.id).populate('comments')
+    if (!article) {
+        req.flash('error', "Sorry, couldn't find that article.")
+        return res.redirect('/articles')
+    }
     res.render('articles/show', {article})
 }))
 
 router.get('/:id/edit', catchAsync(async(req,res) => {
     const article = await Article.findById(req.params.id);
+    if (!article) {
+        req.flash('error', "Sorry, couldn't find that article.")
+        return res.redirect('/articles')
+    }
     res.render('articles/edit', {article})
 }))
 
@@ -49,12 +58,14 @@ router.put('/:id', validateArticle, catchAsync(async(req,res) => {
     article.markdown = req.body.article.markdown;
     article.author = req.body.article.author;
     await article.save()
+    req.flash('success', 'Successfully edited an article!')
     res.redirect(`/articles/${article._id}`)
 }))
 
 router.delete('/:id', catchAsync(async(req,res) => {
     const {id} = req.params;
     await Article.findByIdAndDelete(id);
+    req.flash('success', 'Successfully deleted an article!')
     res.redirect('/articles')
 }))
 
