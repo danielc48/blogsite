@@ -4,6 +4,7 @@ const {articleSchema} = require('../schemas')
 const catchAsync = require('../utils/catchAsync');
 const ExpressError = require('../utils/ExpressErrors');
 const Article = require('../models/article');
+const {isLoggedIn} = require('../middleware')
 
 const validateArticle = (req,res,next) => {
     const {error} = articleSchema.validate(req.body);
@@ -20,11 +21,11 @@ router.get('/', catchAsync(async(req,res) => {
     res.render('articles/index', {articles})
 }));
 
-router.get('/new', (req,res) => {
+router.get('/new', isLoggedIn, (req,res) => {
     res.render('articles/new')
 })
 
-router.post('/', validateArticle, catchAsync(async (req,res) => {
+router.post('/', isLoggedIn, validateArticle, catchAsync(async (req,res) => {
     if (!req.body.article) throw new ExpressError(400, 'Invalid Campground Data')
     const article = new Article(req.body.article)
     await article.save();
@@ -41,7 +42,7 @@ router.get('/:id', catchAsync(async(req,res,next) => {
     res.render('articles/show', {article})
 }))
 
-router.get('/:id/edit', catchAsync(async(req,res) => {
+router.get('/:id/edit', isLoggedIn, catchAsync(async(req,res) => {
     const article = await Article.findById(req.params.id);
     if (!article) {
         req.flash('error', "Sorry, couldn't find that article.")
@@ -50,7 +51,7 @@ router.get('/:id/edit', catchAsync(async(req,res) => {
     res.render('articles/edit', {article})
 }))
 
-router.put('/:id', validateArticle, catchAsync(async(req,res) => {
+router.put('/:id', isLoggedIn, validateArticle, catchAsync(async(req,res) => {
     const { id } = req.params;
     const article = await Article.findById(id)
     article.title = req.body.article.title;
@@ -62,7 +63,7 @@ router.put('/:id', validateArticle, catchAsync(async(req,res) => {
     res.redirect(`/articles/${article._id}`)
 }))
 
-router.delete('/:id', catchAsync(async(req,res) => {
+router.delete('/:id', isLoggedIn, catchAsync(async(req,res) => {
     const {id} = req.params;
     await Article.findByIdAndDelete(id);
     req.flash('success', 'Successfully deleted an article!')

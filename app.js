@@ -7,10 +7,14 @@ const engine = require('ejs-mate');
 const session = require('express-session');
 const flash = require('connect-flash')
 const ExpressError = require('./utils/ExpressErrors')
+const passport = require('passport');
+const LocalStrategy = require('passport-local')
+const User = require('./models/user')
 
 
-const articles = require('./routes/articles')
-const comments = require('./routes/comments')
+const userRoutes = require('./routes/users')
+const articleRoutes = require('./routes/articles')
+const commentRoutes = require('./routes/comments')
 
 main().catch(err => console.log(err));
 
@@ -38,15 +42,24 @@ const sessionConfig = {
 
 app.use(session(sessionConfig))
 app.use(flash())
+app.use(passport.initialize())
+app.use(passport.session())
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
+
 
 app.use((req,res,next) => {
+    res.locals.currentUser = req.user;
     res.locals.success = req.flash('success')
     res.locals.error = req.flash('error')
     next();
 })
 
-app.use('/articles', articles)
-app.use('/articles/:id/comments', comments)
+app.use('/', userRoutes)
+app.use('/articles', articleRoutes)
+app.use('/articles/:id/comments', commentRoutes)
 
 app.get('/', (req,res) => {
     res.render('home')
