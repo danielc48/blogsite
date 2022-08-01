@@ -12,6 +12,7 @@ const seedDB = async() => {
     await Article.deleteMany({});
     for (let data of seedData) {
     const article = new Article(data)
+    article.author = '62df9269bcb893323ffb8e01'
     await article.save()
     }
 }

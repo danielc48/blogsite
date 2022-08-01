@@ -17,10 +17,6 @@ const articleSchema = new Schema({
         type: Date,
         default: Date.now
     },
-    author: {
-        type: String,
-        required: true
-    },
     description: {
         type: String,
         required: true
@@ -38,7 +34,11 @@ const articleSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Comment'
         }
-    ]
+    ],
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }
 })
 
 articleSchema.pre('validate', function(next) {
