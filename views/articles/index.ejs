@@ -1,19 +1,21 @@
 <% layout('layouts/boilerplate') -%>
-    <h1>All Articles</h1>
-    <form action="/articles/new" method="GET">
-        <button class="btn btn-success mb-3">New Article</button>
-    </form>
+    <h1 class="text-center mb-3 mt-5">All Articles</h1>
     
 
-    <% for (let article of articles) { %>
-    <div class="card row mb-3">
-      <div class="card-body">
-        <h5 class="card-title"><%= article.title %></h5>
-        <small class="card-subtitle mb-2 text-muted"><%= article.date.toLocaleDateString() %> </small>
-        <p class="card-text"><%= article.description %> </p>
-        <a href="/articles/<%=article._id%>" class="btn btn-primary">View more</a>
-      </div>
-    </div>      
-    <% } %> 
+    <div class="container row d-flex justify-content-center align-items-center">
+      <% for (let article of articles) { %>
+        <div class="card border-light col-md-3 mb-3 mx-5 card-custom">
+          <div class="card-body">
+            <h5 class="card-title"><%= article.title %></h5>
+            <small class="card-subtitle mb-2 text-muted"><%= article.date.toLocaleDateString() %> </small>
+            <p class="card-text"><%= article.description.slice(0,20) %> </p>
+            <form action="/articles/<%=article._id%>" method="GET">
+              <button class="btn btn-outline-dark">View</button>
+            </form>
+          </div>
+        </div>      
+        <% } %> 
+    </div>
+
 
 
