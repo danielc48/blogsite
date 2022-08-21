@@ -43,7 +43,7 @@ const articleSchema = new Schema({
 
 articleSchema.pre('validate', function(next) {
     if(this.markdown) {
-        this.sanitizedHTML = dompurify.sanitize(marked.parse(this.markdown)) 
+         this.sanitizedHTML =  dompurify.sanitize(marked.parse(this.markdown)) 
     }
     next();
 })

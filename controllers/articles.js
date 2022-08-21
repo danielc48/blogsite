@@ -25,7 +25,6 @@ module.exports.showArticle = async(req,res,next) => {
             path: 'author'
         }
     }).populate('author')
-    console.log(article)
     if (!article) {
         req.flash('error', "Sorry, couldn't find that article.")
         return res.redirect('/articles')
